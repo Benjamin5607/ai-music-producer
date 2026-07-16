@@ -1,43 +1,107 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>0코스트 AI 음악 기획팀</title>
-  <base href="/ai-music-producer/" />
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Music Producer - Advanced AI music production information">
+    <meta name="keywords" content="AI music, music production, AI producer, AI lyrics, AI composition">
+    <meta name="author" content="AI Music Producer Team">
+    <title>AI Music Producer | Advanced Music Production with AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        h2, h3, h4 {
+            color: #3498db;
+        }
+        ol, ul {
+            padding-left: 2em;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        p {
+            margin: 10px 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .warning {
+            color: #f39c12;
+            font-style: italic;
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-100">
-  <div id="root" class="max-w-3xl mx-auto px-4 py-10"></div>
-  <script>
-    const steps = [
-      { name: 'AI 프로듀서', description: '멜로디·코드 진행 컨셉을 잡습니다.' },
-      { name: 'AI 작사가', description: '컨셉에 맞는 가사를 다듬습니다.' },
-      { name: 'AI 작곡/MR 감독', description: 'Suno/Udio용 프롬프트와 MR을 준비합니다.' },
-      { name: '보컬 녹음 및 보정', description: '스마트폰·BandLab으로 보컬을 올립니다.' },
-      { name: '비주얼 및 앨범 아트', description: '무료 AI로 커버·숏츠를 만듭니다.' },
-      { name: '유통 및 홍보', description: 'RouteNote/Amuse + 숏폼으로 배포합니다.' }
-    ];
-    let current = 0;
-    const root = document.getElementById('root');
-    function render() {
-      document.title = '0코스트 AI 음악 기획팀 - ' + steps[current].name;
-      root.innerHTML = `
-        <h1 class="text-3xl font-bold mb-2">0코스트 AI 음악 기획팀</h1>
-        <p class="text-slate-400 mb-6">GitHub Pages에서 바로 사용하는 데모 · 현재 단계: <strong class="text-sky-300">${steps[current].name}</strong></p>
-        <div class="flex gap-3 mb-6">
-          <button id="prev" class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-40" ${current===0?'disabled':''}>← 이전</button>
-          <button id="next" class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-40" ${current===steps.length-1?'disabled':''}>다음 →</button>
+<body>
+    <div class="container">
+        <h1>AI Music Producer</h1>
+        <h2>Advanced AI Music Production Information</h2>
+        <ol>
+            <li>
+                <h3>AI Music Production Roles</h3>
+                <p>Information about various AI roles in music production using models like ChatGPT, Claude, and Gemini.</p>
+                <ul>
+                    <li><strong>AI Executive Producer</strong> - Oversees the entire production process</li>
+                    <li><strong>AI Lyricist</strong> - Generates song lyrics</li>
+                    <li><strong>AI Music Director/MR Producer</strong> - Manages musical arrangements and master recordings</li>
+                </ul>
+            </li>
+            <li>
+                <h3>Production Log</h3>
+                <ol>
+                    <li>
+                        <h4>[Phase 1] Information Collection and Processing</h4>
+                        <p>AI Executive Producer role: Collects and processes information to guide the production.</p>
+                        <p>Lyricist role: Processes information to generate lyrics.</p>
+                        <p class="warning">Note: This phase has a budget of 0 credits.</p>
+                    </li>
+                    <li>
+                        <h4>[Phase 2] MR (Master Recording) Processing Capabilities</h4>
+                        <p>Uses Suno and Udio models to process master recordings based on collected information.</p>
+                        <p>Music Director role: Processes information to guide musical arrangements.</p>
+                        <p class="warning">Note: This phase also has a budget of 0 credits.</p>
+                    </li>
+                </ol>
+            </li>
+        </ol>
+        <div class="error">
+            <p>Warning: The content appears to contain some corrupted or placeholder text. Please verify all information before use.</p>
+            <p>If you encounter any issues with the AI music production process, please contact our support team.</p>
         </div>
-        <div class="space-y-2 rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-          ${steps.map((s,i)=>`<div class="rounded-lg px-3 py-2 ${i===current?'bg-sky-950 ring-1 ring-sky-500':''}"><div class="font-semibold">${i+1}. ${s.name}</div><div class="text-sm text-slate-400">${s.description}</div></div>`).join('')}
-        </div>
-        <p class="mt-8 text-xs text-slate-500">Powered by Zerro · <a class="underline" href="https://github.com/Benjamin5607/ai-music-producer">repo</a></p>
-      `;
-      document.getElementById('prev').onclick = () => { if (current>0){ current--; render(); } };
-      document.getElementById('next').onclick = () => { if (current<steps.length-1){ current++; render(); } };
-    }
-    render();
-  </script>
+    </div>
+    <script>
+        // Basic error handling for page load
+        window.addEventListener('load', function() {
+            try {
+                // Check if critical elements exist
+                if (!document.querySelector('h1')) {
+                    throw new Error('Main heading not found');
+                }
+                console.log('Page loaded successfully');
+            } catch (error) {
+                console.error('Page load error:', error);
+                // Fallback content if something goes wrong
+                document.body.innerHTML = '<div style="text-align:center;padding:20px;"><h1>Error Loading Content</h1><p>We apologize for the inconvenience. Please try refreshing the page.</p></div>';
+            }
+        });
+    </script>
 </body>
 </html>
