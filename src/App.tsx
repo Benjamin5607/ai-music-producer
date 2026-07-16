@@ -1,55 +1,157 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Play } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
-interface Step {
-  id: number;
-  name: string;
-  description: string;
-}
+const App = () => {
+  const [stage, setStage] = useState(1);
+  const [artist, setArtist] = useState({ name: '' });
+  const [concept, setConcept] = useState({ chosen: '' });
+  const [lyrics, setLyrics] = useState('');
+  const [music, setMusic] = useState('');
 
-function App() {
-  const [projectStatus, setProjectStatus] = useState('');
-  const [currentStep, setCurrentStep] = useState(0);
-  const steps: Step[] = [
-    { id: 0, name: 'AI 프로듀서', description: '음악의 기본적인 멜로디와 코드 진행을 생성합니다.' },
-    { id: 1, name: 'AI 작사가', description: '음악의 가사를 생성합니다.' },
-    { id: 2, name: 'AI 작곡/MR 감독', description: '음악의 편곡과 믹스를 담당합니다.' },
-    { id: 3, name: '보컬 녹음 및 보정', description: '가수를 통해 보컬을 녹음하고 보정합니다.' },
-    { id: 4, name: '비주얼 및 앨범 아트워크 제작', description: '음악의 비주얼과 앨범 아트워크를 제작합니다.' },
-    { id: 5, name: '유통 및 홍보', description: '음악을 유통하고 홍보합니다.' }
+  const stages = [
+    { id: 1, icon: '🎤', label: '컨셉 및 가사 기획' },
+    { id: 2, icon: '🎵', label: 'MR(반주) 및 멜로디 가이드 생성' },
+    { id: 3, icon: '🎧', label: '본인 보컬 녹음 및 보정' },
+    { id: 4, icon: '🎨', label: '비주얼 및 앨범 아트워크 제작' },
+    { id: 5, icon: '📢', label: '유통 및 홍보' }
   ];
 
-  const handleNextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+  const handleStageChange = (stageId) => {
+    setStage(stageId);
+  };
+
+  const handleArtistChange = (artistName) => {
+    setArtist({ name: artistName });
+  };
+
+  const handleConceptChange = (conceptName) => {
+    setConcept({ chosen: conceptName });
+  };
+
+  const handleLyricsChange = (lyricsText) => {
+    setLyrics(lyricsText);
+  };
+
+  const handleMusicChange = (musicFile) => {
+    setMusic(musicFile);
+  };
+
+  const getConcept = async () => {
+    try {
+      const response = await fetch('https://api.example.com/concept');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch concept:', error);
+      return null;
     }
   };
 
-  const handlePrevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+  const getLyrics = async (concept) => {
+    try {
+      const response = await fetch(`https://api.example.com/lyrics?concept=${concept}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch lyrics:', error);
+      return null;
+    }
+  };
+
+  const getMusic = async (lyrics) => {
+    try {
+      const response = await fetch(`https://api.example.com/music?lyrics=${lyrics}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch music:', error);
+      return null;
     }
   };
 
   useEffect(() => {
-    document.title = `0코스트 AI 음악 기획팀 - ${steps[currentStep].name}`;
-  }, [currentStep, steps]);
+    if (stage === 1) {
+      getConcept().then((concept) => concept && handleConceptChange(concept));
+    } else if (stage === 2) {
+      getLyrics(concept.chosen).then((lyrics) => lyrics && handleLyricsChange(lyrics));
+    } else if (stage === 3) {
+      getMusic(lyrics).then((music) => music && handleMusicChange(music));
+    }
+  }, [stage, concept, lyrics]);
 
   return (
-    <div className='container mx-auto p-4 pt-6 md:p-6 lg:p-12 xl:p-24 flex flex-col items-center justify-center h-screen'>
-      <h1 className='text-3xl font-bold mb-4'>0코스트 AI 음악 기획팀</h1>
-      <p className='text-lg mb-4'>현재 단계: {steps[currentStep].name}</p>
-      <div className='flex justify-between w-full mb-4'>
-        <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' onClick={handlePrevStep}><ArrowLeft size={20} /> 이전 단계</button>
-        <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' onClick={handleNextStep}>다음 단계 <Play size={20} /></button>
-      </div>
-      <div className='bg-gray-200 p-4 rounded-lg shadow-md w-full'>
-        {steps.map((step, index) => (
-          <div key={step.id} className={`py-2 ${currentStep === index ? 'bg-blue-100' : ''}`}>{step.name} - {step.description}</div>
-        ))}
-      </div>
+    <div className="h-screen flex flex-col items-center justify-center bg-[#1a202c] text-white">
+      <header className="p-3 bg-[#1a202c] text-white">
+        <h1 className="text-lg font-bold mb-2">0코스트 AI 음악 기획팀</h1>
+        <p className="text-sm mb-4">페르소나 에이전트 · 단계별 프롬프트 워크벤치 · 무료 툴 연결 · localStorage 프로젝트 저장</p>
+        <div className="flex flex-wrap gap-2">
+          <button className="btn btn-ghost" id="btn-export">프로젝트 JSON보내기</button>
+          <button className="btn btn-ghost" id="btn-reset">초기화</button>
+        </div>
+      </header>
+      <main className="card p-3 h-fit">
+        <h2 className="text-lg font-bold mb-2">0코스트 AI 음악 기획팀</h2>
+        <p className="text-sm mb-4">페르소나 에이전트 · 단계별 프롬프트 워크벤치 · 무료 툴 연결 · localStorage 프로젝트 저장</p>
+        <div className="flex flex-wrap gap-2">
+          <button className="btn btn-ghost" id="btn-export">프로젝트 JSON보내기</button>
+          <button className="btn btn-ghost" id="btn-reset">초기화</button>
+        </div>
+        <div className="grid md:grid-cols-[240px_1fr] gap-4">
+          <div className="flex flex-col items-center justify-center">
+            {stages.map((stage) => (
+              <button
+                key={stage.id}
+                className="btn btn-ghost"
+                onClick={() => handleStageChange(stage.id)}
+              >
+                <span className="mr-2">{stage.icon}</span>
+                {stage.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-col items-center justify-center">
+            <input
+              type="text"
+              className="input input-ghost w-full max-w-xs"
+              placeholder="아티스트 이름"
+              value={artist.name}
+              onChange={(e) => handleArtistChange(e.target.value)}
+            />
+            <select
+              className="select select-ghost w-full max-w-xs"
+              value={concept.chosen}
+              onChange={(e) => handleConceptChange(e.target.value)}
+            >
+              <option value="">컨셉 선택</option>
+              <option value="팝">팝</option>
+              <option value="록">록</option>
+            </select>
+            <textarea
+              className="textarea textarea-ghost w-full max-w-xs"
+              placeholder="가사"
+              value={lyrics}
+              onChange={(e) => handleLyricsChange(e.target.value)}
+            ></textarea>
+            <input
+              type="file"
+              className="input input-ghost w-full max-w-xs"
+              placeholder="음악 파일"
+              onChange={(e) => handleMusicChange(e.target.files[0])}
+            />
+          </div>
+        </div>
+      </main>
     </div>
   );
-}
+};
 
 export default App;
