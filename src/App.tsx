@@ -1,55 +1,143 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Play } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
-interface Step {
-  id: number;
-  name: string;
-  description: string;
-}
+const App = () => {
+  const [stage, setStage] = useState(1);
+  const [artist, setArtist] = useState({ name: '' });
+  const [concept, setConcept] = useState({ chosen: '' });
+  const [lyrics, setLyrics] = useState('');
+  const [music, setMusic] = useState('');
+  const [albumArt, setAlbumArt] = useState('');
 
-function App() {
-  const [projectStatus, setProjectStatus] = useState('');
-  const [currentStep, setCurrentStep] = useState(0);
-  const steps: Step[] = [
-    { id: 0, name: 'AI 총괄 프로듀서 (Executive Producer)', description: '시장 트렌드 분석, 아티스트(본인) 컨셉 매칭, 앨범 기획 및 릴리즈 일정 조율을 담당합니다.' },
-    { id: 1, name: 'AI 작사가 (Lyricist)', description: '프로듀서의 컨셉에 맞춘 가사 작업, 압운(Rhyme) 및 보컬 발음(Phonetics) 고려한 개사를 담당합니다.' },
-    { id: 2, name: 'AI 작곡/MR 감독 (Music Director)', description: '장르 설정, 코드 진행 가이드 제공, 음악 생성 AI용 최적의 프롬프트 엔지니어링을 담당합니다.' },
-    { id: 3, name: '보컬 녹음 및 보정', description: '가수를 통해 보컬을 녹음하고 보정합니다.' },
-    { id: 4, name: '비주얼 및 앨범 아트워크 제작', description: '음악의 비주얼과 앨범 아트워크를 제작합니다.' },
-    { id: 5, name: '유통 및 홍보', description: '음악을 유통하고 홍보합니다.' }
+  const stages = [
+    { id: 1, icon: '🎤', label: '컨셉 및 가사 기획' },
+    { id: 2, icon: '🎵', label: 'MR(반주) 및 멜로디 가이드 생성' },
+    { id: 3, icon: '🎧', label: '본인 보컬 녹음 및 보정' },
+    { id: 4, icon: '🎨', label: '비주얼 및 앨범 아트워크 제작' },
+    { id: 5, icon: '📢', label: '유통 및 홍보' }
   ];
 
-  const handleNextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+  const handleStageChange = (stageId) => {
+    setStage(stageId);
+  };
+
+  const handleArtistChange = (artistName) => {
+    setArtist({ name: artistName });
+  };
+
+  const handleConceptChange = (conceptName) => {
+    setConcept({ chosen: conceptName });
+  };
+
+  const handleLyricsChange = (lyricsText) => {
+    setLyrics(lyricsText);
+  };
+
+  const handleMusicChange = (musicText) => {
+    setMusic(musicText);
+  };
+
+  const handleAlbumArtChange = (albumArtText) => {
+    setAlbumArt(albumArtText);
+  };
+
+  const generatePrompt = () => {
+    if (stage === 1) {
+      return `너는 글로벌 K-POP/인디 씬을 꿰뚫고 있는 천재 프로듀서야. 보컬의 매력을 극대화할 수 있는 독창적인 싱글 컨셉 3가지를 제안해줘.`;
+    } else if (stage === 2) {
+      return `현재 가장 퀄리티가 좋은 음악 생성 AI인 Suno나 Udio의 무료 크레딧을 활용해 ${concept.chosen} 장르의 ${artist.name}의 ${lyrics} 가사를 가진 곡을 생성해줘.`;
+    } else if (stage === 3) {
+      return `조용한 방에서 이불을 뒤집어쓰거나(자연 흡음) 스마트폰 마이크로 MR을 이어폰으로 들으며 보컬을 녹음하고, BandLab (완전 무료 DAW)을 사용해 오토튠(Auto-pitch) 기능과 무료 마스터링 프리셋을 사용해 그럴듯한 음질을 만들어줘.`;
+    } else if (stage === 4) {
+      return `SeaArt, Leonardo.ai, 혹은 Bing Image Creator (DALL-E 3)의 무료 크레딧을 사용해 ${concept.chosen} 컨셉에 맞는 앨범 아트를 생성해줘.`;
+    } else if (stage === 5) {
+      return `RouteNote 또는 Amuse 같은 무료 음원 유통사(Distributor)를 이용해 수수료(수익의 15% 내외)만 떼고 스포티파이, 애플뮤직, 멜론 등 전 세계 플랫폼에 초기 비용 0원으로 음원을 등록하고, 유튜브 쇼츠, 틱톡, 인스타그램 릴스를 메인 채널로 잡아 0원으로 앨범을 홍보해줘.`;
     }
   };
 
-  const handlePrevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(JSON.stringify({
+      artist: artist.name,
+      concept: concept.chosen,
+      lyrics: lyrics,
+      music: music,
+      albumArt: albumArt
+    }, null, 2));
   };
-
-  useEffect(() => {
-    document.title = `0코스트 AI 음악 기획팀 - ${steps[currentStep].name}`;
-  }, [currentStep, steps]);
 
   return (
-    <div className='container mx-auto p-4 pt-6 md:p-6 lg:p-12 xl:p-24 flex flex-col items-center justify-center h-screen'>
-      <h1 className='text-3xl font-bold mb-4'>0코스트 AI 음악 기획팀</h1>
-      <p className='text-lg mb-4'>현재 단계: {steps[currentStep].name}</p>
-      <div className='flex justify-between w-full mb-4'>
-        <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' onClick={handlePrevStep}><ArrowLeft size={20} /> 이전 단계</button>
-        <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' onClick={handleNextStep}>다음 단계 <Play size={20} /></button>
-      </div>
-      <div className='bg-gray-200 p-4 rounded-lg shadow-md w-full'>
-        {steps.map((step, index) => (
-          <div key={step.id} className={`py-2 ${currentStep === index ? 'bg-blue-100' : ''}`}>{step.name} - {step.description}</div>
-        ))}
-      </div>
+    <div className="h-screen flex flex-col items-center justify-center bg-[#1a202c] text-white">
+      <header className="p-3 bg-[#1a202c] text-white">
+        <h1 className="text-lg font-bold mb-2">0코스트 AI 음악 기획팀</h1>
+        <p className="text-sm mb-4">페르소나 에이전트 · 단계별 프롬프트 워크벤치 · 무료 툴 연결 · localStorage 프로젝트 저장</p>
+        <div className="flex flex-wrap gap-2">
+          <button className="btn btn-ghost" id="btn-export" onClick={copyToClipboard}>총 재 정보 JSON로드</button>
+          <button className="btn btn-ghost" id="btn-reset">총도트</button>
+        </div>
+      </header>
+      <main className="card p-3 h-fit">
+        <h2 className="text-lg font-bold mb-2">0코스트 AI 음악 기획팀</h2>
+        <p className="text-sm mb-4">페르소나 에이전트 · 단계별 프롬프트 워크벤치 · 무료 툴 연결 · localStorage 프로젝트 저장</p>
+        <div className="flex flex-wrap gap-2">
+          <button className="btn btn-ghost" id="btn-export" onClick={copyToClipboard}>프로젝트 JSON보내기</button>
+          <button className="btn btn-ghost" id="btn-reset">초기화</button>
+        </div>
+        <div className="grid md:grid-cols-[240px_1fr] gap-4">
+          <div className="flex flex-col items-center justify-center">
+            {stages.map((stage) => (
+              <button
+                key={stage.id}
+                className="btn btn-ghost"
+                onClick={() => handleStageChange(stage.id)}
+              >
+                <span className="mr-2">{stage.icon}</span>
+                {stage.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-col items-center justify-center">
+            <input
+              type="text"
+              className="input input-ghost w-full max-w-xs"
+              placeholder="아티스트 이름"
+              value={artist.name}
+              onChange={(e) => handleArtistChange(e.target.value)}
+            />
+            <select
+              className="select select-ghost w-full max-w-xs"
+              value={concept.chosen}
+              onChange={(e) => handleConceptChange(e.target.value)}
+            >
+              <option value="">컨셉 선택</option>
+              <option value="팝">팝</option>
+              <option value="록">록</option>
+            </select>
+            <textarea
+              className="textarea textarea-ghost w-full max-w-xs"
+              placeholder="가사"
+              value={lyrics}
+              onChange={(e) => handleLyricsChange(e.target.value)}
+            />
+            <textarea
+              className="textarea textarea-ghost w-full max-w-xs"
+              placeholder="음악"
+              value={music}
+              onChange={(e) => handleMusicChange(e.target.value)}
+            />
+            <textarea
+              className="textarea textarea-ghost w-full max-w-xs"
+              placeholder="앨범 아트"
+              value={albumArt}
+              onChange={(e) => handleAlbumArtChange(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="mt-4">
+          <p className="text-sm">프롬프트: {generatePrompt()}</p>
+        </div>
+      </main>
     </div>
   );
-}
+};
 
 export default App;
