@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+`import React, { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 
 const App = () => {
@@ -7,6 +7,7 @@ const App = () => {
   const [concept, setConcept] = useState({ chosen: '' });
   const [lyrics, setLyrics] = useState('');
   const [music, setMusic] = useState('');
+  const [albumArt, setAlbumArt] = useState('');
 
   const stages = [
     { id: 1, icon: '🎤', label: '컨셉 및 가사 기획' },
@@ -32,61 +33,37 @@ const App = () => {
     setLyrics(lyricsText);
   };
 
-  const handleMusicChange = (musicFile) => {
-    setMusic(musicFile);
+  const handleMusicChange = (musicText) => {
+    setMusic(musicText);
   };
 
-  const getConcept = async () => {
-    try {
-      const response = await fetch('https://api.example.com/concept');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Failed to fetch concept:', error);
-      return null;
-    }
+  const handleAlbumArtChange = (albumArtText) => {
+    setAlbumArt(albumArtText);
   };
 
-  const getLyrics = async (concept) => {
-    try {
-      const response = await fetch(`https://api.example.com/lyrics?concept=${concept}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Failed to fetch lyrics:', error);
-      return null;
-    }
-  };
-
-  const getMusic = async (lyrics) => {
-    try {
-      const response = await fetch(`https://api.example.com/music?lyrics=${lyrics}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Failed to fetch music:', error);
-      return null;
-    }
-  };
-
-  useEffect(() => {
+  const generatePrompt = () => {
     if (stage === 1) {
-      getConcept().then((concept) => concept && handleConceptChange(concept));
+      return `너는 글로벌 K-POP/인디 씬을 꿰뚫고 있는 천재 프로듀서야. 보컬의 매력을 극대화할 수 있는 독창적인 싱글 컨셉 3가지를 제안해줘.`;
     } else if (stage === 2) {
-      getLyrics(concept.chosen).then((lyrics) => lyrics && handleLyricsChange(lyrics));
+      return `현재 가장 퀄리티가 좋은 음악 생성 AI인 Suno나 Udio의 무료 크레딧을 활용해 ${concept.chosen} 장르의 ${artist.name}의 ${lyrics} 가사를 가진 곡을 생성해줘.`;
     } else if (stage === 3) {
-      getMusic(lyrics).then((music) => music && handleMusicChange(music));
+      return `조용한 방에서 이불을 뒤집어쓰거나(자연 흡음) 스마트폰 마이크로 MR을 이어폰으로 들으며 보컬을 녹음하고, BandLab (완전 무료 DAW)을 사용해 오토튠(Auto-pitch) 기능과 무료 마스터링 프리셋을 사용해 그럴듯한 음질을 만들어줘.`;
+    } else if (stage === 4) {
+      return `SeaArt, Leonardo.ai, 혹은 Bing Image Creator (DALL-E 3)의 무료 크레딧을 사용해 ${concept.chosen} 컨셉에 맞는 앨범 아트를 생성해줘.`;
+    } else if (stage === 5) {
+      return `RouteNote 또는 Amuse 같은 무료 음원 유통사(Distributor)를 이용해 수수료(수익의 15% 내외)만 떼고 스포티파이, 애플뮤직, 멜론 등 전 세계 플랫폼에 초기 비용 0원으로 음원을 등록하고, 유튜브 쇼츠, 틱톡, 인스타그램 릴스를 메인 채널로 잡아 0원으로 앨범을 홍보해줘.`;
     }
-  }, [stage, concept, lyrics]);
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(JSON.stringify({
+      artist: artist.name,
+      concept: concept.chosen,
+      lyrics: lyrics,
+      music: music,
+      albumArt: albumArt
+    }, null, 2));
+  };
 
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-[#1a202c] text-white">
@@ -94,15 +71,15 @@ const App = () => {
         <h1 className="text-lg font-bold mb-2">0코스트 AI 음악 기획팀</h1>
         <p className="text-sm mb-4">페르소나 에이전트 · 단계별 프롬프트 워크벤치 · 무료 툴 연결 · localStorage 프로젝트 저장</p>
         <div className="flex flex-wrap gap-2">
-          <button className="btn btn-ghost" id="btn-export">프로젝트 JSON보내기</button>
-          <button className="btn btn-ghost" id="btn-reset">초기화</button>
+          <button className="btn btn-ghost" id="btn-export" onClick={copyToClipboard}>총 재 정보 JSON로드</button>
+          <button className="btn btn-ghost" id="btn-reset">총도트</button>
         </div>
       </header>
       <main className="card p-3 h-fit">
         <h2 className="text-lg font-bold mb-2">0코스트 AI 음악 기획팀</h2>
         <p className="text-sm mb-4">페르소나 에이전트 · 단계별 프롬프트 워크벤치 · 무료 툴 연결 · localStorage 프로젝트 저장</p>
         <div className="flex flex-wrap gap-2">
-          <button className="btn btn-ghost" id="btn-export">프로젝트 JSON보내기</button>
+          <button className="btn btn-ghost" id="btn-export" onClick={copyToClipboard}>프로젝트 JSON보내기</button>
           <button className="btn btn-ghost" id="btn-reset">초기화</button>
         </div>
         <div className="grid md:grid-cols-[240px_1fr] gap-4">
@@ -140,14 +117,23 @@ const App = () => {
               placeholder="가사"
               value={lyrics}
               onChange={(e) => handleLyricsChange(e.target.value)}
-            ></textarea>
-            <input
-              type="file"
-              className="input input-ghost w-full max-w-xs"
-              placeholder="음악 파일"
-              onChange={(e) => handleMusicChange(e.target.files[0])}
+            />
+            <textarea
+              className="textarea textarea-ghost w-full max-w-xs"
+              placeholder="음악"
+              value={music}
+              onChange={(e) => handleMusicChange(e.target.value)}
+            />
+            <textarea
+              className="textarea textarea-ghost w-full max-w-xs"
+              placeholder="앨범 아트"
+              value={albumArt}
+              onChange={(e) => handleAlbumArtChange(e.target.value)}
             />
           </div>
+        </div>
+        <div className="mt-4">
+          <p className="text-sm">프롬프트: {generatePrompt()}</p>
         </div>
       </main>
     </div>
@@ -155,3 +141,4 @@ const App = () => {
 };
 
 export default App;
+`
