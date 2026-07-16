@@ -1,1 +1,326 @@
-<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>0창치 AI 방개권 공구과</title><base href="/ai-music-producer/" /><script src="https://cdn.tailwindcss.com"></script><style>:root { color-scheme: dark; }body { font-family: "Pretendard", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif; }textarea, input, select { outline: none; }.card { background: rgba(15,23,42,.85); border: 1px solid #1e293b; border-radius: 1rem; }.chip { border: 1px solid #334155; border-radius: 999px; padding: 0.25rem 0.5rem; background: #1f2c40; color: #fff; }</style></head><body><header class="p-3 bg-[#1a202c] text-white"><h1 class="text-lg font-bold mb-2">0창치 AI 방개권 공구과</h1><p class="text-sm mb-4">0찼치 AI 방개권 공구과 다구 로그게 및 신 리 어 디 로그게</p><div class="flex flex-wrap gap-2"><button class="btn btn-ghost" id="btn-export">JSON 로그게 불기</button><button class="btn btn-ghost" id="btn-reset">JSON 총가</button></div></header><!-- 다구 로그게 및 신 리 어 디 로그게 --><div class="grid md:grid-cols-[240px_1fr] gap-4"><main class="card p-3 h-fit"><h2 class="text-lg font-bold mb-2">0창치 AI 방개권 공구과</h2><p class="text-sm mb-4">AI 방개권 공구과 다구 로그게 및 신 리 어 디 로그게</p><div class="flex flex-wrap gap-2"><button class="btn btn-ghost" id="btn-export">JSON 로그게 불기</button><button class="btn btn-ghost" id="btn-reset">JSON 총가</button></div></main></div><script>const STAGES = [{id: 1, icon: '🏄', label: '작군 방개 공구과'}, {id: 2, icon: '🎵', label: 'MR(방개) 방개 그램 작군 리 어 디 로그게'}]; let state = {stage: 1, artist: {name: ''}, concept: {chosen: ''}}; try { // 다구 로그게 및 신 리 어 디 로그게 const storedState = localStorage.getItem('state'); if (storedState) { state = JSON.parse(storedState); } } catch (error) { console.error('Error loading state:', error); } function saveState() { try { localStorage.setItem('state', JSON.stringify(state)); } catch (error) { console.error('Error saving state:', error); } } document.getElementById('btn-export').addEventListener('click', () => { try { const jsonData = JSON.stringify(state, null, 2); const blob = new Blob([jsonData], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'state.json'; a.click(); } catch (error) { console.error('Error exporting state:', error); } }); document.getElementById('btn-reset').addEventListener('click', () => { try { state = {stage: 1, artist: {name: ''}, concept: {chosen: ''}}; saveState(); } catch (error) { console.error('Error resetting state:', error); } });</script></body></html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>0코스트 AI 음악 프로듀서 워크벤치</title>
+  <base href="/ai-music-producer/" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { color-scheme: dark; }
+    body { font-family: "Pretendard","Noto Sans KR",ui-sans-serif,system-ui,sans-serif; background:#070b14; color:#e8eefc; }
+    .card { background:rgba(15,23,42,.92); border:1px solid #1e293b; border-radius:1rem; }
+    .chip { border:1px solid #334155; border-radius:999px; padding:.25rem .65rem; background:#1f2c40; font-size:.75rem; }
+    .chip.on { background:#2563eb; border-color:#3b82f6; }
+    textarea,input,select { background:#0b1220; border:1px solid #334155; border-radius:.75rem; color:#e8eefc; width:100%; padding:.65rem .75rem; }
+    button.btn { border-radius:.75rem; padding:.55rem .9rem; font-weight:600; font-size:.85rem; }
+    button.primary { background:#2563eb; color:#fff; }
+    button.ghost { background:#1e293b; color:#cbd5e1; border:1px solid #334155; }
+    button:disabled { opacity:.45; cursor:not-allowed; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <header class="border-b border-slate-800 px-4 py-3 flex flex-wrap gap-3 items-center justify-between">
+    <div>
+      <h1 class="text-lg font-bold tracking-tight">0코스트 AI 음악 프로듀서</h1>
+      <p class="text-xs text-slate-400">페르소나 · 프롬프트 · 5단계 로드맵 · 로컬 저장 (무료 툴만)</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button class="btn ghost" id="btn-export" type="button">JSON 내보내기</button>
+      <button class="btn ghost" id="btn-reset" type="button">초기화</button>
+    </div>
+  </header>
+
+  <div class="grid lg:grid-cols-[240px_1fr] gap-4 p-4 max-w-6xl mx-auto">
+    <aside class="card p-3 h-fit space-y-2">
+      <p class="text-[11px] uppercase tracking-wide text-slate-500 mb-2">로드맵</p>
+      <nav id="stage-nav" class="space-y-1"></nav>
+      <div class="pt-3 border-t border-slate-800 text-xs text-slate-400" id="progress-label">0/5 완료</div>
+    </aside>
+
+    <main class="space-y-4">
+      <section class="card p-4 space-y-3">
+        <label class="text-xs text-slate-400">아티스트 / 프로젝트명</label>
+        <input id="artist-name" placeholder="예: Midnight Echo" />
+        <div class="grid sm:grid-cols-3 gap-2" id="persona-cards"></div>
+      </section>
+
+      <section class="card p-4 space-y-3" id="stage-panel"></section>
+    </main>
+  </div>
+
+<script>
+const STORAGE_KEY = 'zerro_music_workbench_v2';
+const PERSONAS = [
+  {
+    id: 'producer',
+    title: 'AI 총괄 프로듀서',
+    role: '시장 트렌드 · 컨셉 매칭 · 릴리즈 일정',
+    tools: 'ChatGPT / Gemini 무료',
+    color: '#60a5fa',
+    prompt: (s) => `너는 글로벌 K-POP/인디 씬을 꿰뚫는 천재 프로듀서야. 아티스트 "${s.artist.name || '아티스트'}"의 매력을 극대화할 독창 싱글 컨셉 3가지를 제안해. 각 컨셉에 타깃 청취자, 무드, 참고 레퍼런스, 한 줄 로그라인을 포함해.`
+  },
+  {
+    id: 'lyricist',
+    title: 'AI 작사가',
+    role: '압운 · 발음 · Verse/Chorus 구조',
+    tools: 'Claude 무료',
+    color: '#c084fc',
+    prompt: (s) => `너는 감성과 문학적 표현이 뛰어난 작사가야. 컨셉: "${s.concept.chosen || '(미정)'}". Verse-Pre-Chorus-Chorus 구조로 가사를 써. 음절 수와 보컬 발음을 고려하고, 한글/영어 혼용 가능.`
+  },
+  {
+    id: 'director',
+    title: 'AI 작곡/MR 감독',
+    role: '장르 · 코드 · Suno/Udio 프롬프트',
+    tools: 'Suno / Udio 무료 크레딧',
+    color: '#34d399',
+    prompt: (s) => `너는 음악 생성 AI 프롬프트 엔지니어야. 컨셉 "${s.concept.chosen || '(미정)'}"에 맞는 Suno 스타일 태그(장르, BPM, 악기, 분위기)와 영어 스타일 프롬프트, 그리고 보컬 분리(Demucs/vocalremover) 체크리스트를 작성해.`
+  }
+];
+
+const STAGES = [
+  {
+    id: 1,
+    title: '1. 컨셉 & 가사 기획',
+    cost: '0원',
+    checklist: ['프로듀서에게 컨셉 3안 받기', '컨셉 1개 확정', '작사가에게 Verse-Chorus 가사 받기', '가사 메모에 저장'],
+    body: (s) => `
+      <h2 class="text-base font-bold">컨셉 및 가사 (0원)</h2>
+      <p class="text-sm text-slate-400">프로듀서 프롬프트로 컨셉을 뽑고, 확정 후 작사가 프롬프트를 복사하세요.</p>
+      <label class="text-xs text-slate-400">확정 컨셉</label>
+      <input id="concept-chosen" value="${escapeAttr(s.concept.chosen)}" placeholder="예: 비 오는 밤의 lo-fi 고백" />
+      <label class="text-xs text-slate-400">가사 초안</label>
+      <textarea id="lyrics" rows="8" placeholder="Verse / Chorus 가사">${escapeHtml(s.lyrics)}</textarea>
+      <div class="flex flex-wrap gap-2">
+        <button class="btn primary" type="button" data-copy="producer">프로듀서 프롬프트 복사</button>
+        <button class="btn primary" type="button" data-copy="lyricist">작사가 프롬프트 복사</button>
+      </div>`
+  },
+  {
+    id: 2,
+    title: '2. MR & 멜로디 가이드',
+    cost: '0원',
+    checklist: ['Suno/Udio 스타일 태그 확정', '가이드 트랙 생성', 'vocalremover/Demucs로 MR 분리', 'MR 파일명 메모'],
+    body: (s) => `
+      <h2 class="text-base font-bold">MR / 멜로디 가이드 (0원)</h2>
+      <p class="text-sm text-slate-400">작곡 감독 프롬프트를 Suno·Udio에 붙여넣고, 완성곡에서 보컬을 분리하세요.</p>
+      <label class="text-xs text-slate-400">Suno 스타일 태그</label>
+      <input id="suno-tags" value="${escapeAttr(s.mr.tags)}" placeholder="lofi beats, emotional piano, R&B, 80bpm" />
+      <label class="text-xs text-slate-400">MR / 파일 메모</label>
+      <textarea id="mr-notes" rows="4" placeholder="예: take3_mr.wav · Demucs htdemucs">${escapeHtml(s.mr.notes)}</textarea>
+      <div class="flex flex-wrap gap-2">
+        <button class="btn primary" type="button" data-copy="director">작곡감독 프롬프트 복사</button>
+        <a class="btn ghost" href="https://suno.com" target="_blank" rel="noopener">Suno 열기</a>
+        <a class="btn ghost" href="https://vocalremover.org" target="_blank" rel="noopener">Vocal Remover</a>
+      </div>`
+  },
+  {
+    id: 3,
+    title: '3. 보컬 녹음 & 보정',
+    cost: '0원',
+    checklist: ['조용한 공간에서 스마트폰 녹음', 'BandLab에 MR+보컬 임포트', 'Auto-pitch / 컴프 / 리버브', '최종 믹스 메모'],
+    body: (s) => `
+      <h2 class="text-base font-bold">보컬 녹음 · 믹싱 (0원)</h2>
+      <p class="text-sm text-slate-400">이불 흡음 + 이어폰 모니터링 + BandLab 무료 DAW로 방구석 녹음을 다듬습니다.</p>
+      <label class="text-xs text-slate-400">녹음/믹스 메모</label>
+      <textarea id="vocal-notes" rows="5" placeholder="테이크, 오토튠 강도, 리버브 설정">${escapeHtml(s.vocal.notes)}</textarea>
+      <div class="flex flex-wrap gap-2">
+        <a class="btn primary" href="https://www.bandlab.com" target="_blank" rel="noopener">BandLab 열기</a>
+      </div>`
+  },
+  {
+    id: 4,
+    title: '4. 비주얼 & 앨범아트',
+    cost: '0원',
+    checklist: ['앨범 커버 프롬프트 작성', 'SeaArt/Leonardo/Bing 생성', 'Shorts용 10초 루프 기획', '커버 파일명 저장'],
+    body: (s) => `
+      <h2 class="text-base font-bold">비주얼 · 앨범 아트 (0원)</h2>
+      <label class="text-xs text-slate-400">커버 이미지 프롬프트</label>
+      <textarea id="art-prompt" rows="4" placeholder="cinematic album cover, rainy neon street, lonely silhouette...">${escapeHtml(s.art.prompt)}</textarea>
+      <label class="text-xs text-slate-400">비주얼/쇼츠 메모</label>
+      <textarea id="art-notes" rows="3">${escapeHtml(s.art.notes)}</textarea>
+      <div class="flex flex-wrap gap-2">
+        <button class="btn primary" type="button" id="btn-art-prompt">커버 프롬프트 복사</button>
+        <a class="btn ghost" href="https://www.bing.com/images/create" target="_blank" rel="noopener">Bing Image Creator</a>
+        <a class="btn ghost" href="https://www.canva.com" target="_blank" rel="noopener">Canva</a>
+      </div>`
+  },
+  {
+    id: 5,
+    title: '5. 유통 & 홍보',
+    cost: '0원',
+    checklist: ['RouteNote/Amuse 계정', '메타데이터·커버 업로드', '쇼츠/틱톡/릴스 메이킹 연재', '발매일 체크'],
+    body: (s) => `
+      <h2 class="text-base font-bold">유통 · 홍보 (초기비용 0원)</h2>
+      <p class="text-sm text-slate-400">무료 유통사로 스포티파이·애플뮤직·멜론 등에 올리고, "0원으로 앨범 만들기" 메이킹을 숏폼으로 연재하세요.</p>
+      <label class="text-xs text-slate-400">유통/마케팅 메모</label>
+      <textarea id="distro-notes" rows="5">${escapeHtml(s.distro.notes)}</textarea>
+      <div class="flex flex-wrap gap-2">
+        <a class="btn primary" href="https://routenote.com" target="_blank" rel="noopener">RouteNote</a>
+        <a class="btn ghost" href="https://amusio.com" target="_blank" rel="noopener">Amuse</a>
+      </div>`
+  }
+];
+
+function defaultState() {
+  return {
+    stage: 1,
+    artist: { name: '' },
+    concept: { chosen: '' },
+    lyrics: '',
+    mr: { tags: '', notes: '' },
+    vocal: { notes: '' },
+    art: { prompt: '', notes: '' },
+    distro: { notes: '' },
+    checks: {}
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState();
+    return { ...defaultState(), ...JSON.parse(raw) };
+  } catch (e) {
+    console.error(e);
+    return defaultState();
+  }
+}
+
+let state = loadState();
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { console.error(e); }
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escapeAttr(s) {
+  return escapeHtml(s).replace(/"/g, '&quot;');
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => toast('클립보드에 복사됨')).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    toast('클립보드에 복사됨');
+  });
+}
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'fixed bottom-4 right-4 bg-emerald-600 text-white text-sm px-3 py-2 rounded-lg shadow-lg z-50';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
+}
+
+function renderPersonas() {
+  const root = document.getElementById('persona-cards');
+  root.innerHTML = PERSONAS.map(p => `
+    <div class="rounded-xl border border-slate-700 p-3" style="border-color:${p.color}55">
+      <div class="text-sm font-semibold" style="color:${p.color}">${p.title}</div>
+      <div class="text-xs text-slate-400 mt-1">${p.role}</div>
+      <div class="chip mt-2 inline-block">${p.tools}</div>
+    </div>`).join('');
+}
+
+function renderNav() {
+  const nav = document.getElementById('stage-nav');
+  nav.innerHTML = STAGES.map(st => {
+    const done = (state.checks[st.id] || []).filter(Boolean).length;
+    const total = st.checklist.length;
+    const on = state.stage === st.id ? 'on' : '';
+    return `<button type="button" class="chip w-full text-left ${on}" data-stage="${st.id}">${st.title}<span class="float-right opacity-70">${done}/${total}</span></button>`;
+  }).join('');
+  nav.querySelectorAll('[data-stage]').forEach(btn => {
+    btn.addEventListener('click', () => { state.stage = Number(btn.dataset.stage); saveState(); render(); });
+  });
+  const all = STAGES.reduce((a, st) => a + st.checklist.length, 0);
+  const doneAll = STAGES.reduce((a, st) => a + (state.checks[st.id] || []).filter(Boolean).length, 0);
+  document.getElementById('progress-label').textContent = `체크 ${doneAll}/${all} · 단계 ${state.stage}/5`;
+}
+
+function renderStage() {
+  const st = STAGES.find(x => x.id === state.stage) || STAGES[0];
+  const checks = state.checks[st.id] || st.checklist.map(() => false);
+  state.checks[st.id] = checks;
+  const panel = document.getElementById('stage-panel');
+  panel.innerHTML = `
+    <div class="flex items-center justify-between gap-2 flex-wrap">
+      <div class="chip">${st.cost}</div>
+      <div class="flex gap-2">
+        <button class="btn ghost" type="button" id="btn-prev" ${state.stage<=1?'disabled':''}>이전</button>
+        <button class="btn ghost" type="button" id="btn-next" ${state.stage>=5?'disabled':''}>다음</button>
+      </div>
+    </div>
+    ${st.body(state)}
+    <div class="border-t border-slate-800 pt-3 space-y-2">
+      <p class="text-xs font-semibold text-slate-300">체크리스트</p>
+      ${st.checklist.map((c,i) => `
+        <label class="flex items-start gap-2 text-sm">
+          <input type="checkbox" data-check="${i}" ${checks[i]?'checked':''} class="mt-1" />
+          <span>${c}</span>
+        </label>`).join('')}
+    </div>`;
+
+  document.getElementById('btn-prev')?.addEventListener('click', () => { state.stage = Math.max(1, state.stage-1); saveState(); render(); });
+  document.getElementById('btn-next')?.addEventListener('click', () => { state.stage = Math.min(5, state.stage+1); saveState(); render(); });
+
+  panel.querySelectorAll('[data-check]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const i = Number(cb.dataset.check);
+      state.checks[st.id][i] = cb.checked;
+      saveState(); renderNav();
+    });
+  });
+
+  const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('input', fn); };
+  bind('concept-chosen', e => { state.concept.chosen = e.target.value; saveState(); });
+  bind('lyrics', e => { state.lyrics = e.target.value; saveState(); });
+  bind('suno-tags', e => { state.mr.tags = e.target.value; saveState(); });
+  bind('mr-notes', e => { state.mr.notes = e.target.value; saveState(); });
+  bind('vocal-notes', e => { state.vocal.notes = e.target.value; saveState(); });
+  bind('art-prompt', e => { state.art.prompt = e.target.value; saveState(); });
+  bind('art-notes', e => { state.art.notes = e.target.value; saveState(); });
+  bind('distro-notes', e => { state.distro.notes = e.target.value; saveState(); });
+
+  panel.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = PERSONAS.find(x => x.id === btn.dataset.copy);
+      if (p) copyText(p.prompt(state));
+    });
+  });
+  document.getElementById('btn-art-prompt')?.addEventListener('click', () => {
+    const prompt = state.art.prompt || `Album cover for "${state.artist.name || 'indie artist'}", concept: ${state.concept.chosen || 'emotional night city'}, cinematic, high detail`;
+    copyText(prompt);
+  });
+}
+
+function render() {
+  document.getElementById('artist-name').value = state.artist.name || '';
+  renderPersonas();
+  renderNav();
+  renderStage();
+}
+
+document.getElementById('artist-name').addEventListener('input', e => {
+  state.artist.name = e.target.value; saveState();
+});
+document.getElementById('btn-export').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ai-music-workbench.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if (!confirm('로컬 진행 상황을 초기화할까요?')) return;
+  state = defaultState(); saveState(); render();
+});
+
+render();
+</script>
+</body>
+</html>
